@@ -8,7 +8,7 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 from langchain_core.tools import tool
 import operator
 
@@ -167,7 +167,7 @@ def agent_node(state: AgentState) -> AgentState:
     messages = state["messages"]
     
     # Initialize the LLM with tools
-    llm = ChatOpenAI(model="gpt-4o", temperature=0)
+    llm = ChatAnthropic(model="claude-sonnet-4-5-20250929", temperature=0)
     tools = [search_linkedin_jobs, get_job_details, apply_to_job, generate_cover_letter]
     llm_with_tools = llm.bind_tools(tools)
     

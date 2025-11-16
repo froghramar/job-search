@@ -166,8 +166,12 @@ def agent_node(state: AgentState) -> AgentState:
     """
     messages = state["messages"]
     
-    # Initialize the LLM with tools
-    llm = ChatAnthropic(model="claude-sonnet-4-5-20250929", temperature=0)
+    # Initialize the LLM with tools - Using Claude Sonnet 4
+    llm = ChatAnthropic(
+        model="claude-sonnet-4-20250514",
+        temperature=0,
+        max_tokens=4096
+    )
     tools = [search_linkedin_jobs, get_job_details, apply_to_job, generate_cover_letter]
     llm_with_tools = llm.bind_tools(tools)
     

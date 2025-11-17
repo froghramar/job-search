@@ -18,6 +18,10 @@ python-dotenv>=1.0.0
 playwright>=1.40.0
 selenium>=4.15.0
 
+# LinkedIn Scraping
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+
 # HTTP and async
 httpx>=0.25.0
 aiohttp>=3.9.0

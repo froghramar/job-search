@@ -32,87 +32,122 @@ class AgentState(MessagesState):
 # CUSTOM TOOLS
 # ============================================================================
 
+# Import the real scraper
+from linkedin_agent.real_linkedin_scraper import LinkedInJobScraper
+
+# Initialize scraper globally
+_scraper = None
+
+def get_scraper():
+    """Lazy initialization of scraper"""
+    global _scraper
+    if _scraper is None:
+        _scraper = LinkedInJobScraper()
+    return _scraper
+
+
 @tool
 def search_linkedin_jobs(
     keywords: str,
     location: str = "",
-    experience_level: str = "entry",
-    job_type: str = "full-time"
+    experience_level: str = "mid",
+    job_type: str = "full-time",
+    remote: bool = False,
+    limit: int = 10
 ) -> dict:
     """
-    Search for jobs on LinkedIn based on criteria.
+    Search for REAL jobs on LinkedIn based on criteria.
+    This tool scrapes actual, current job listings from LinkedIn.
     
     Args:
         keywords: Job title or keywords to search for
         location: Location for the job (city, state, or remote)
-        experience_level: Experience level (entry, mid, senior)
-        job_type: Type of job (full-time, part-time, contract, internship)
+        experience_level: Experience level (entry, mid, senior, director, executive)
+        job_type: Type of job (full-time, part-time, contract, temporary, internship)
+        remote: Filter for remote jobs only
+        limit: Maximum number of jobs to return (default 10)
     
     Returns:
-        Dictionary containing list of jobs found
+        Dictionary containing list of real jobs found
     """
-    # TODO: Implement actual LinkedIn job search
-    # This is a placeholder that simulates the search
-    # In production, you would:
-    # 1. Use LinkedIn API (requires authentication)
-    # 2. Use web scraping with Playwright/Selenium
-    # 3. Use third-party APIs like RapidAPI LinkedIn scrapers
-    
-    mock_jobs = [
-        {
-            "job_id": "job_001",
-            "title": f"{keywords} - Senior Position",
-            "company": "TechCorp Inc.",
-            "location": location or "Remote",
-            "description": f"Looking for experienced {keywords} professional...",
-            "url": "https://linkedin.com/jobs/view/job_001",
-            "posted_date": "2 days ago",
-            "easy_apply": True
-        },
-        {
-            "job_id": "job_002",
-            "title": f"{keywords} Engineer",
-            "company": "InnovateTech",
-            "location": location or "San Francisco, CA",
-            "description": f"Join our team as a {keywords}...",
-            "url": "https://linkedin.com/jobs/view/job_002",
-            "posted_date": "1 week ago",
-            "easy_apply": True
+    try:
+        scraper = get_scraper()
+        
+        # Search for real jobs
+        jobs = scraper.search_jobs(
+            keywords=keywords,
+            location=location,
+            experience_level=experience_level,
+            job_type=job_type,
+            remote=remote,
+            limit=limit
+        )
+        
+        return {
+            "success": True,
+            "jobs": jobs,
+            "count": len(jobs),
+            "search_params": {
+                "keywords": keywords,
+                "location": location,
+                "experience_level": experience_level,
+                "job_type": job_type,
+                "remote": remote
+            },
+            "source": "LinkedIn (live scraping)"
         }
-    ]
     
-    return {
-        "success": True,
-        "jobs": mock_jobs,
-        "count": len(mock_jobs),
-        "search_params": {
-            "keywords": keywords,
-            "location": location,
-            "experience_level": experience_level,
-            "job_type": job_type
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "jobs": [],
+            "count": 0,
+            "message": f"Failed to fetch jobs from LinkedIn: {str(e)}"
         }
-    }
 
 
 @tool
 def get_job_details(job_id: str) -> dict:
     """
-    Get detailed information about a specific job posting.
+    Get detailed information about a specific job posting from LinkedIn.
+    This fetches the full job description and details from the live listing.
     
     Args:
         job_id: Unique identifier for the job
     
     Returns:
-        Detailed job information
+        Detailed job information including full description
     """
-    # TODO: Implement actual job details retrieval
-    return {
-        "job_id": job_id,
-        "full_description": "Detailed job description here...",
-        "requirements": ["Python", "AI/ML", "3+ years experience"],
-        "benefits": ["Health insurance", "401k", "Remote work"],
-        "salary_range": "$120k - $180k"
-    }
+    try:
+        scraper = get_scraper()
+        
+        # Get real job details
+        details = scraper.get_job_details(job_id)
+        
+        if details:
+            return {
+                "success": True,
+                "job_id": job_id,
+                "full_description": details.get("full_description", ""),
+                "criteria": details.get("criteria", {}),
+                "url": details.get("url", f"https://www.linkedin.com/jobs/view/{job_id}"),
+                "source": "LinkedIn (live scraping)"
+            }
+        else:
+            return {
+                "success": False,
+                "error": "Could not fetch job details",
+                "job_id": job_id
+            }
+    
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e),
+            "job_id": job_id,
+            "message": f"Failed to fetch job details: {str(e)}"
+        }
 
 
 @tool

@@ -4,7 +4,7 @@ Built with LangGraph for agentic AI workflows
 """
 
 from typing import Annotated, TypedDict, Literal
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph, START, END, MessagesState
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
@@ -16,9 +16,12 @@ import operator
 # STATE DEFINITION
 # ============================================================================
 
-class AgentState(TypedDict):
-    """State schema for the LinkedIn job agent"""
-    messages: Annotated[list, add_messages]
+class AgentState(MessagesState):
+    """
+    State schema for the LinkedIn job agent.
+    Extends MessagesState to enable Chat mode in LangGraph Studio.
+    """
+    # MessagesState already includes: messages: Annotated[list, add_messages]
     job_search_params: dict
     found_jobs: list
     applied_jobs: list
@@ -272,9 +275,12 @@ graph = create_linkedin_agent()
 if __name__ == "__main__":
     """
     Example usage for testing the agent locally.
+    When using LangGraph Studio, you can test directly in Chat mode!
     """
     print("LinkedIn Job Search Agent - Testing Mode")
     print("=" * 50)
+    print("\n💡 TIP: Run 'langgraph dev' and use Chat mode in LangGraph Studio")
+    print("   for the best experience!\n")
     
     # Test the agent with a sample query
     initial_state = {
@@ -300,4 +306,8 @@ if __name__ == "__main__":
             print(f"Human: {message.content}")
     
     print("\n" + "=" * 50)
-    print("Test complete. Use 'langgraph dev' to run with studio.")
+    print("✅ Test complete!")
+    print("\n🚀 To use Chat mode:")
+    print("   1. Run: langgraph dev")
+    print("   2. Click the 'Chat' tab in LangGraph Studio")
+    print("   3. Start chatting with your agent!")

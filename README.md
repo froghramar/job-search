@@ -20,8 +20,6 @@ langgraph dev
 4. **Click the "Chat" tab** in LangGraph Studio
 5. Start chatting: `"Find me ML engineer jobs in Seattle"`
 
-That's it! 🎉 See [CHAT_MODE_GUIDE.md](CHAT_MODE_GUIDE.md) for detailed usage.
-
 ### Current Features
 - ✅ Intelligent job search based on user criteria
 - ✅ Detailed job information retrieval

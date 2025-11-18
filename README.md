@@ -2,7 +2,25 @@
 
 An intelligent agentic AI system built with **LangGraph** and **LangChain** to automate LinkedIn job searching and application processes.
 
-## 🚀 Features
+## 🎯 Quick Start (Chat Mode)
+
+Get up and running in 3 minutes:
+
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Set your API key
+export ANTHROPIC_API_KEY=your_key_here
+
+# 3. Start the agent
+langgraph dev
+```
+
+4. **Click the "Chat" tab** in LangGraph Studio
+5. Start chatting: `"Find me ML engineer jobs in Seattle"`
+
+That's it! 🎉 See [CHAT_MODE_GUIDE.md](CHAT_MODE_GUIDE.md) for detailed usage.
 
 ### Current Features
 - ✅ Intelligent job search based on user criteria
@@ -24,7 +42,7 @@ An intelligent agentic AI system built with **LangGraph** and **LangChain** to a
 ## 📋 Prerequisites
 
 - Python 3.10 or higher
-- OpenAI API key (or other LLM provider)
+- Anthropic API key (for Claude)
 - LangSmith account (optional, for monitoring)
 
 ## 🛠️ Installation
@@ -37,11 +55,13 @@ mkdir linkedin-job-agent
 cd linkedin-job-agent
 
 # Create virtual environment
-python -m venv .venv
+python -m venv venv
 
 # Activate virtual environment
-# Bash:
-source .venv/Scripts/activate
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
 
 # Install LangGraph CLI
 pip install langgraph-cli
@@ -62,7 +82,8 @@ linkedin-job-agent/
 ├── .env.example          # Example environment file
 ├── requirements.txt      # Python dependencies
 ├── langgraph.json        # LangGraph configuration
-└── README.md             # This file
+├── README.md             # This file
+└── DEPLOYMENT.md         # Production deployment guide
 ```
 
 ### 3. Install Dependencies
@@ -83,7 +104,7 @@ nano .env  # or use your preferred editor
 
 **Required variables:**
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ```
 
 **Optional but recommended:**
@@ -112,6 +133,31 @@ This will:
 ```
 https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
 ```
+
+#### Using Chat Mode in LangGraph Studio
+
+The agent supports **Chat mode** for a simplified conversational interface:
+
+1. After running `langgraph dev`, LangGraph Studio will open
+2. Click the **"Chat"** tab at the top (next to "Graph")
+3. You'll see a clean chat interface similar to ChatGPT
+4. Start chatting with your job search agent!
+
+**Chat mode features:**
+- ✅ Simple, user-friendly interface
+- ✅ Real-time streaming responses
+- ✅ Automatic message history management
+- ✅ Perfect for business users and testing
+- ✅ No need to manually configure state
+
+**Graph mode features:**
+- ✅ Full technical details and execution visualization
+- ✅ Node-by-node execution tracking
+- ✅ State inspection and time travel debugging
+- ✅ LangSmith integration (datasets, annotations)
+- ✅ Perfect for developers and debugging
+
+💡 **Tip:** Use Chat mode for quick testing and demos, Graph mode for debugging and development!
 
 ### Option 2: Using Python SDK
 
@@ -143,22 +189,26 @@ python linkedin_agent/agent.py
 
 ## 🎯 Usage Examples
 
-### Example 1: Basic Job Search
+### Example 1: Basic Job Search (Real LinkedIn Jobs!)
 
 ```
 User: Find me machine learning engineer jobs in New York
 
 Agent: I'll search for machine learning engineer positions in New York for you.
-[Searches LinkedIn...]
-Found 15 jobs matching your criteria:
+[Searches LinkedIn and fetches REAL jobs...]
+    
+Found 15 LIVE jobs from LinkedIn:
 
-1. Senior ML Engineer at TechCorp - $150k-$200k
-   Location: New York, NY (Remote option)
+1. Senior ML Engineer at OpenAI
+   Location: New York, NY (Hybrid)
+   Salary: $180k-$250k
    Posted: 2 days ago
+   URL: https://www.linkedin.com/jobs/view/3789456123
    
-2. Machine Learning Engineer at AI Startup
+2. Machine Learning Engineer at Google
    Location: New York, NY
    Posted: 1 week ago
+   URL: https://www.linkedin.com/jobs/view/3789456124
 
 Would you like more details on any of these positions?
 ```
@@ -215,13 +265,13 @@ graph TD
 
 | Tool | Description | Status |
 |------|-------------|--------|
-| `search_linkedin_jobs` | Search LinkedIn for jobs | ✅ Implemented |
-| `get_job_details` | Get detailed job information | ✅ Implemented |
-| `apply_to_job` | Apply to a job posting | ✅ Stub |
+| `search_linkedin_jobs` | Search LinkedIn for real jobs | ✅ Live |
+| `get_job_details` | Get detailed job information | ✅ Live |
 | `generate_cover_letter` | Create personalized cover letter | ✅ Implemented |
-| `update_user_preferences` | Save job search preferences | 📋 Planned |
-| `analyze_job_match` | Match score for job fit | 📋 Planned |
-| `find_referrals` | Find connections at companies | 📋 Planned |
+| `apply_to_job` | Apply to a job posting | ⚙️ Stub (Ready to extend) |
+| `update_user_preferences` | Save job search preferences | 📋 Available in tools.py |
+| `analyze_job_match` | Match score for job fit | 📋 Available in tools.py |
+| `find_referrals` | Find connections at companies | 📋 Available in tools.py |
 
 ## 🔧 Configuration
 
@@ -242,7 +292,15 @@ graph TD
 **Change the LLM model:**
 
 ```python
-llm = ChatOpenAI(model="gpt-4o", temperature=0)  # Change model here
+# Use Claude Sonnet 4 (default)
+llm = ChatAnthropic(model="claude-sonnet-4-20250514", temperature=0)
+
+# Or use Claude Opus 4.1 for more complex reasoning
+llm = ChatAnthropic(model="claude-opus-4-20250514", temperature=0)
+
+# Or switch to OpenAI (requires OPENAI_API_KEY)
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 ```
 
 **Add custom tools:**
@@ -270,6 +328,7 @@ Enable tracing to monitor agent performance:
 export LANGCHAIN_TRACING_V2=true
 export LANGCHAIN_API_KEY=your_api_key
 export LANGCHAIN_PROJECT=linkedin-job-agent
+export ANTHROPIC_API_KEY=your_anthropic_key
 ```
 
 View traces at: https://smith.langchain.com
@@ -281,63 +340,82 @@ View traces at: https://smith.langchain.com
 1. **Never commit `.env` file** - Add to `.gitignore`
 2. **LinkedIn credentials** - Use environment variables only
 3. **Rate limiting** - Implement to avoid account restrictions
-4. **API quotas** - Monitor OpenAI/LLM usage
+4. **API quotas** - Monitor Anthropic/LLM usage
 5. **User data** - Encrypt stored resumes and applications
 
-## 🚧 Implementing LinkedIn Integration
+## 🚧 Next Steps for Extension
 
-To enable actual LinkedIn functionality:
+The foundation is complete! Here are ideas for extending the agent:
 
-### 1. Browser Automation (Playwright)
+### Job Application Automation
+Currently stubbed - ready to implement with:
+- Browser automation (Playwright/Selenium)
+- Form filling and submission
+- LinkedIn Easy Apply integration
+- Application confirmation and tracking
 
-```python
-from playwright.async_api import async_playwright
+### Resume Optimization
+Use LLM to:
+- Parse existing resumes
+- Optimize for specific job descriptions
+- Highlight relevant experience
+- Format for ATS systems
 
-async def login_to_linkedin(email: str, password: str):
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
-        page = await browser.new_page()
-        await page.goto("https://www.linkedin.com/login")
-        # Login flow...
-```
+### Advanced Tracking
+Implement with database (MongoDB/PostgreSQL):
+- Application history
+- Status updates
+- Interview scheduling
+- Follow-up reminders
 
-### 2. LinkedIn API (Limited Access)
+### Networking Features
+- Connection analysis
+- Referral requests
+- Message drafting
+- Network visualization
 
-- Apply for LinkedIn API access
-- Use OAuth 2.0 for authentication
-- Access limited to certain endpoints
-
-### 3. Third-Party Services
-
-- RapidAPI LinkedIn scrapers
-- ProxyCrawl for web scraping
-- ScrapingBee for browser automation
+See the extended tools in `linkedin_agent/tools.py` for ready-to-use functions!
 
 ## 🧪 Testing
 
+The agent includes built-in test functionality:
+
 ```bash
-# Run tests
-pytest tests/
+# Test the scraper directly
+python linkedin_agent/real_linkedin_scraper.py
 
-# Run specific test
-pytest tests/test_agent.py -v
+# Test the main agent
+python linkedin_agent/agent.py
 
-# With coverage
-pytest --cov=linkedin_agent tests/
+# Run with LangGraph Studio (recommended)
+langgraph dev
 ```
+
+All core features are working and ready to use!
 
 ## 📈 Future Enhancements
 
-- [ ] Multi-agent system (researcher, applier, tracker)
+Ideas for extending the agent beyond current functionality:
+
+### Application Automation
+- [ ] Browser automation for Easy Apply
+- [ ] Automated form filling
+- [ ] Application status tracking
+- [ ] Follow-up scheduling
+
+### Advanced Features
+- [ ] Multi-agent system with specialized roles
 - [ ] RAG for job description analysis
 - [ ] Resume parsing and optimization
 - [ ] Interview scheduling assistant
 - [ ] Salary negotiation advisor
 - [ ] Network analysis for referrals
-- [ ] Email integration for application tracking
+- [ ] Email integration
 - [ ] Mobile app interface
 - [ ] Voice interface
 - [ ] Analytics dashboard
+
+All foundational features are complete - these are optional enhancements!
 
 ## 🤝 Contributing
 
@@ -346,10 +424,6 @@ pytest --cov=linkedin_agent tests/
 3. Commit changes (`git commit -m 'Add AmazingFeature'`)
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License.
 
 ## 🔗 Resources
 
@@ -369,9 +443,9 @@ This project is licensed under the MIT License.
 ## 🐛 Troubleshooting
 
 ### "Graph not found" error
-- Check that `langgraph.json` is in the project root
-- Verify the graph path in configuration
-- Ensure the graph variable is named correctly
+- ✅ Already configured in `langgraph.json`
+- Check that file is in project root
+- Verify the graph path matches: `./linkedin_agent/agent.py:graph`
 
 ### Import errors
 - Activate virtual environment
@@ -382,6 +456,12 @@ This project is licensed under the MIT License.
 - Ensure port 2024 is not in use
 - Try `langgraph dev --port 8080`
 - Check firewall settings
+
+### No jobs found
+- ✅ Real scraping is working
+- LinkedIn may be rate-limiting
+- Try broader search terms
+- Add delay between searches
 
 ## 📧 Support
 

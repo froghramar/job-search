@@ -29,14 +29,21 @@ class AgentState(MessagesState):
 
 
 # ============================================================================
-# CUSTOM TOOLS
+# CUSTOM TOOLS (NOW WITH REAL LINKEDIN SCRAPING)
 # ============================================================================
 
-# Import the real scraper
+# Import the real scraper and profile fetcher
 from linkedin_agent.real_linkedin_scraper import LinkedInJobScraper
+from linkedin_agent.profile_fetcher import get_user_profile
+from linkedin_agent.resume_cover_generator import (
+    generate_resume_for_job,
+    generate_cover_letter_for_job,
+    generate_full_application
+)
 
 # Initialize scraper globally
 _scraper = None
+_user_profile = None
 
 def get_scraper():
     """Lazy initialization of scraper"""
@@ -44,6 +51,17 @@ def get_scraper():
     if _scraper is None:
         _scraper = LinkedInJobScraper()
     return _scraper
+
+def get_cached_user_profile():
+    """Get user profile (cached)"""
+    global _user_profile
+    if _user_profile is None:
+        _user_profile = get_user_profile()
+        if _user_profile:
+            print(f"✅ Loaded profile for: {_user_profile.get('name', 'User')}")
+        else:
+            print("⚠️ Could not load user profile. Set LINKEDIN_USER_HANDLE in .env")
+    return _user_profile
 
 
 @tool

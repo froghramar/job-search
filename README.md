@@ -53,13 +53,13 @@ mkdir linkedin-job-agent
 cd linkedin-job-agent
 
 # Create virtual environment
-python -m venv venv
+python -m venv .venv
 
 # Activate virtual environment
 # On macOS/Linux:
-source venv/bin/activate
+source .venv/bin/activate
 # On Windows:
-venv\Scripts\activate
+source .venv/Scripts/activate
 
 # Install LangGraph CLI
 pip install langgraph-cli
@@ -73,15 +73,18 @@ Create the following structure:
 linkedin-job-agent/
 ├── linkedin_agent/
 │   ├── __init__.py
-│   ├── agent.py          # Main agent code
-│   ├── tools.py          # Extended tools
-│   └── utils.py          # Utility functions
-├── .env                   # Environment variables
-├── .env.example          # Example environment file
-├── requirements.txt      # Python dependencies
-├── langgraph.json        # LangGraph configuration
-├── README.md             # This file
-└── DEPLOYMENT.md         # Production deployment guide
+│   ├── agent.py                    # Main agent code
+│   ├── advanced_agent.py           # Multi-agent system
+│   ├── tools.py                    # Extended tools
+│   ├── real_linkedin_scraper.py    # LinkedIn job scraper
+│   └── utils.py                    # Utility functions
+├── .env                             # Environment variables
+├── .env.example                    # Example environment file
+├── requirements.txt                # Python dependencies
+├── langgraph.json                  # LangGraph configuration
+├── .gitignore                      # Git ignore rules
+├── README.md                       # Main documentation
+├── DEPLOYMENT.md                   # Production deployment
 ```
 
 ### 3. Install Dependencies
@@ -132,30 +135,22 @@ This will:
 https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
 ```
 
-#### Using Chat Mode in LangGraph Studio
+#### Using Chat Mode
 
-The agent supports **Chat mode** for a simplified conversational interface:
+LangGraph Studio provides two interfaces:
 
-1. After running `langgraph dev`, LangGraph Studio will open
-2. Click the **"Chat"** tab at the top (next to "Graph")
-3. You'll see a clean chat interface similar to ChatGPT
-4. Start chatting with your job search agent!
+**Chat Mode** - Simple conversational interface:
+- Click the **"Chat"** tab at the top
+- Clean chat interface for testing
+- Real-time streaming responses
+- Perfect for demos and quick testing
 
-**Chat mode features:**
-- ✅ Simple, user-friendly interface
-- ✅ Real-time streaming responses
-- ✅ Automatic message history management
-- ✅ Perfect for business users and testing
-- ✅ No need to manually configure state
-
-**Graph mode features:**
-- ✅ Full technical details and execution visualization
-- ✅ Node-by-node execution tracking
-- ✅ State inspection and time travel debugging
-- ✅ LangSmith integration (datasets, annotations)
-- ✅ Perfect for developers and debugging
-
-💡 **Tip:** Use Chat mode for quick testing and demos, Graph mode for debugging and development!
+**Graph Mode** - Technical debugging view:
+- Visual execution graph
+- Node-by-node tracking
+- State inspection
+- Time travel debugging
+- LangSmith integration
 
 ### Option 2: Using Python SDK
 
@@ -299,6 +294,24 @@ llm = ChatAnthropic(model="claude-opus-4-20250514", temperature=0)
 # Or switch to OpenAI (requires OPENAI_API_KEY)
 from langchain_openai import ChatOpenAI
 llm = ChatOpenAI(model="gpt-4o", temperature=0)
+```
+
+**Change scraping method:**
+
+```python
+# Default: Public scraper (no auth)
+from linkedin_agent.real_linkedin_scraper import LinkedInJobScraper
+scraper = LinkedInJobScraper()
+
+# Or use library method (more features)
+# pip install linkedin-jobs-scraper
+from linkedin_agent.real_linkedin_scraper import LinkedInJobsLibraryScraper
+scraper = LinkedInJobsLibraryScraper()
+
+# Or use API method (requires credentials)
+# pip install linkedin-api
+from linkedin_agent.real_linkedin_scraper import LinkedInAPIClient
+scraper = LinkedInAPIClient()
 ```
 
 **Add custom tools:**

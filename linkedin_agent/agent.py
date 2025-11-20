@@ -196,19 +196,214 @@ def apply_to_job(job_id: str, cover_letter: str = "") -> dict:
 
 
 @tool
-def generate_cover_letter(job_description: str, user_resume: str = "") -> str:
+def get_my_profile() -> dict:
     """
-    Generate a tailored cover letter for a job application.
+    Fetch and display the user's LinkedIn profile information.
+    Shows current skills, experience, education that will be used for applications.
+    
+    Returns:
+        Dictionary containing user's profile data
+    """
+    try:
+        user_profile = get_cached_user_profile()
+        
+        if not user_profile:
+            return {
+                "success": False,
+                "error": "Could not load profile. Set LINKEDIN_USER_HANDLE in .env"
+            }
+        
+        return {
+            "success": True,
+            "profile": {
+                "name": user_profile.get('name'),
+                "headline": user_profile.get('headline'),
+                "location": user_profile.get('location'),
+                "about": user_profile.get('about', '')[:200] + "..." if user_profile.get('about') else "No summary",
+                "skills": user_profile.get('skills', [])[:15],
+                "experience_count": len(user_profile.get('experience', [])),
+                "education_count": len(user_profile.get('education', [])),
+                "certifications_count": len(user_profile.get('certifications', [])),
+                "url": user_profile.get('url')
+            },
+            "message": "Profile loaded successfully. This data will be used to generate personalized application materials."
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Error fetching profile: {str(e)}"
+        }
+
+
+@tool
+def generate_cover_letter(job_title: str, company_name: str, job_description: str) -> str:
+    """
+    Generate a personalized cover letter based on user's profile and job description.
+    Uses the user's real LinkedIn profile data to create a tailored cover letter.
     
     Args:
-        job_description: The job description
-        user_resume: User's resume or professional summary
+        job_title: The job title
+        company_name: The company name
+        job_description: Full job description text
     
     Returns:
         Generated cover letter text
     """
-    # TODO: Use LLM to generate personalized cover letter
-    return f"Generated cover letter based on the job requirements..."
+    try:
+        # Get user profile
+        user_profile = get_cached_user_profile()
+        
+        if not user_profile:
+            return "Error: Could not load user profile. Please set LINKEDIN_USER_HANDLE in .env"
+        
+        # Generate cover letter
+        cover_letter = generate_cover_letter_for_job(
+            user_profile=user_profile,
+            job_title=job_title,
+            company_name=company_name,
+            job_description=job_description,
+            tone="professional"
+        )
+        
+        return cover_letter
+        
+    except Exception as e:
+        return f"Error generating cover letter: {str(e)}"
+
+
+@tool
+def generate_resume(job_description: str, format: str = "professional") -> str:
+    """
+    Generate a tailored resume based on user's profile and job requirements.
+    Uses the user's real LinkedIn profile data to create an optimized resume.
+    
+    Args:
+        job_description: Full job description text
+        format: Resume format (professional, ats, technical)
+    
+    Returns:
+        Generated resume text
+    """
+    try:
+        # Get user profile
+        user_profile = get_cached_user_profile()
+        
+        if not user_profile:
+            return "Error: Could not load user profile. Please set LINKEDIN_USER_HANDLE in .env"
+        
+        # Generate resume
+        resume = generate_resume_for_job(
+            user_profile=user_profile,
+            job_description=job_description,
+            format=format
+        )
+        
+        return resume
+        
+    except Exception as e:
+        return f"Error generating resume: {str(e)}"
+
+
+@tool
+def generate_application_package(
+    job_title: str,
+    company_name: str,
+    job_description: str,
+    save_files: bool = True
+) -> dict:
+    """
+    Generate complete application package (resume + cover letter) for a job.
+    Uses the user's real LinkedIn profile to create tailored materials.
+    Optionally saves to files.
+    
+    Args:
+        job_title: The job title
+        company_name: The company name
+        job_description: Full job description text
+        save_files: Whether to save materials to files
+    
+    Returns:
+        Dictionary with resume and cover letter
+    """
+    try:
+        # Get user profile
+        user_profile = get_cached_user_profile()
+        
+        if not user_profile:
+            return {
+                "success": False,
+                "error": "Could not load user profile. Set LINKEDIN_USER_HANDLE in .env"
+            }
+        
+        # Generate package
+        package = generate_full_application(
+            user_profile=user_profile,
+            job_title=job_title,
+            company_name=company_name,
+            job_description=job_description,
+            save_to_files=save_files
+        )
+        
+        result = {
+            "success": True,
+            "candidate": package['candidate'],
+            "job_title": package['job_title'],
+            "company": package['company'],
+            "resume": package.get('resume', ''),
+            "cover_letter": package.get('cover_letter', ''),
+        }
+        
+        if save_files and 'saved_files' in package:
+            result['saved_files'] = package['saved_files']
+            result['message'] = f"Application materials saved to {len(package['saved_files'])} files"
+        
+        return result
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Error generating application package: {str(e)}"
+        }
+
+
+@tool
+def get_my_profile() -> dict:
+    """
+    Fetch and display the user's LinkedIn profile information.
+    Shows current skills, experience, education that will be used for applications.
+    
+    Returns:
+        Dictionary containing user's profile data
+    """
+    try:
+        user_profile = get_cached_user_profile()
+        
+        if not user_profile:
+            return {
+                "success": False,
+                "error": "Could not load profile. Set LINKEDIN_USER_HANDLE in .env"
+            }
+        
+        return {
+            "success": True,
+            "profile": {
+                "name": user_profile.get('name'),
+                "headline": user_profile.get('headline'),
+                "location": user_profile.get('location'),
+                "about": user_profile.get('about', '')[:200] + "...",
+                "skills": user_profile.get('skills', [])[:15],
+                "experience_count": len(user_profile.get('experience', [])),
+                "education_count": len(user_profile.get('education', [])),
+                "url": user_profile.get('url')
+            }
+        }
+        
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Error fetching profile: {str(e)}"
+        }
 
 
 # ============================================================================
@@ -228,30 +423,49 @@ def agent_node(state: AgentState) -> AgentState:
         temperature=0,
         max_tokens=4096
     )
-    tools = [search_linkedin_jobs, get_job_details, apply_to_job, generate_cover_letter]
+    tools = [
+        search_linkedin_jobs,
+        get_job_details,
+        apply_to_job,
+        generate_cover_letter,
+        generate_resume,
+        generate_application_package,
+        get_my_profile
+    ]
     llm_with_tools = llm.bind_tools(tools)
     
     # System message for the agent
     system_message = SystemMessage(content="""
-    You are an intelligent LinkedIn job search and application assistant.
+    You are an intelligent LinkedIn job search and application assistant with access to the user's real LinkedIn profile.
     
     Your capabilities:
-    1. Search for jobs on LinkedIn based on user criteria
+    1. Search for real jobs on LinkedIn based on user criteria
     2. Get detailed information about specific jobs
-    3. Generate personalized cover letters
-    4. Apply to jobs on behalf of the user (with confirmation)
+    3. Access the user's actual LinkedIn profile (skills, experience, education)
+    4. Generate personalized cover letters based on user's profile and job requirements
+    5. Generate tailored resumes optimized for specific jobs
+    6. Create complete application packages (resume + cover letter)
+    7. Apply to jobs on behalf of the user (with confirmation)
+    
+    When helping with applications:
+    - Always use get_my_profile first to understand the user's background
+    - Generate materials that highlight relevant experience from their actual profile
+    - Ask for confirmation before applying to jobs
+    - Save application materials to files when requested
     
     Always:
     - Ask for confirmation before applying to jobs
     - Provide clear summaries of job matches
     - Help users refine their search criteria
     - Be proactive in suggesting relevant actions
+    - Use the user's actual profile data for personalization
     
     When searching for jobs, consider:
     - Keywords/job titles
     - Location preferences
     - Experience level
     - Job type (full-time, contract, etc.)
+    - Remote options
     """)
     
     # Invoke the LLM
@@ -290,7 +504,15 @@ def create_linkedin_agent() -> StateGraph:
     workflow.add_node("agent", agent_node)
     
     # Create tools node
-    tools = [search_linkedin_jobs, get_job_details, apply_to_job, generate_cover_letter]
+    tools = [
+        search_linkedin_jobs,
+        get_job_details,
+        apply_to_job,
+        generate_cover_letter,
+        generate_resume,
+        generate_application_package,
+        get_my_profile
+    ]
     workflow.add_node("tools", ToolNode(tools))
     
     # Add edges

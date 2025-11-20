@@ -20,7 +20,7 @@ requests>=2.31.0
 lxml>=4.9.0
 
 # LinkedIn API - For authenticated profile and job access
-linkedin-api>=2.2.0
+linkedin-api>=2.3.1
 
 # Optional: More robust scraping (Method 2)
 # Uncomment if you want to use linkedin-jobs-scraper

@@ -4,23 +4,28 @@ langgraph-sdk>=0.1.66
 langgraph-checkpoint>=2.0.23
 langchain>=0.3.0
 langchain-core>=0.2.38
-langchain-openai>=0.2.0
+langchain-anthropic>=0.1.0
 
 # LLM Providers (add others as needed)
-langchain-anthropic>=0.1.0
+langchain-openai>=0.2.0
 langchain-google-genai>=1.0.0
 
 # Tools and utilities
 langsmith>=0.1.63
 python-dotenv>=1.0.0
 
-# Web automation for LinkedIn (for future implementation)
-playwright>=1.40.0
-selenium>=4.15.0
-
-# LinkedIn Scraping
+# LinkedIn Scraping - Choose your method
 beautifulsoup4>=4.12.0
 requests>=2.31.0
+lxml>=4.9.0
+
+# LinkedIn API - For authenticated profile and job access
+linkedin-api>=2.2.0
+
+# Optional: More robust scraping (Method 2)
+# Uncomment if you want to use linkedin-jobs-scraper
+# linkedin-jobs-scraper>=1.15.0
+# selenium>=4.15.0
 
 # HTTP and async
 httpx>=0.25.0
